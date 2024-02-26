@@ -1,11 +1,7 @@
 import axios from 'axios';
 import dayjs from 'dayjs';
 import NodeRSA from 'node-rsa';
-import MD5 from 'crypto-js/md5.js';
-import Hex from 'crypto-js/enc-hex.js';
-import HmacSHA1 from 'crypto-js/hmac-sha1.js';
-import Base64 from 'crypto-js/enc-base64.js';
-import Utf8 from 'crypto-js/enc-utf8.js';
+import CryptoJS from 'crypto-js';
 
 let url = 'https://api.tyun77.cn';
 let device = {};
@@ -24,7 +20,7 @@ swIDAQAB
     'pkcs8-public-pem',
     {
         encryptionScheme: 'pkcs1',
-    }
+    },
 );
 
 async function request(reqUrl, ua) {
@@ -54,7 +50,7 @@ async function request(reqUrl, ua) {
     tkSrc += sj;
     tkSrc += 'XSpeUFjJ';
     console.log(tkSrc);
-    let tk = Hex.stringify(MD5(tkSrc)).toString().toLowerCase();
+    let tk = CryptoJS.enc.Hex.stringify(CryptoJS.MD5(tkSrc)).toString().toLowerCase();
     console.log(tk);
     let header = {
         'User-Agent': ua || 'okhttp/3.12.0',
@@ -78,7 +74,7 @@ async function request(reqUrl, ua) {
     return resp.data;
 }
 
-async function init(inReq, outResp) {
+async function init(inReq, _outResp) {
     const deviceKey = inReq.server.prefix + '/device';
     device = await inReq.server.db.getObjectDefault(deviceKey, {});
     if (!device.id) {
@@ -91,10 +87,10 @@ async function init(inReq, outResp) {
     await request(url + '/api.php/provide/config');
     await request(url + '/api.php/provide/checkUpgrade');
     await request(url + '/api.php/provide/channel');
-    outResp.send({});
+    return {};
 }
 
-async function home(inReq, outResp) {
+async function home(_inReq, _outResp) {
     let data = (await request(url + '/api.php/provide/filter')).data;
     let classes = [];
     let filterObj = {};
@@ -156,18 +152,18 @@ async function home(inReq, outResp) {
             console.log(e);
         }
     }
-    outResp.send({
+    return {
         class: classes,
         filters: filterObj,
-    });
+    };
 }
 
-async function category(inReq, outResp) {
+async function category(inReq, _outResp) {
     const tid = inReq.body.id;
     const pg = inReq.body.page;
-    const ext = inReq.body.filters;
+    const extend = inReq.body.filters;
     let reqUrl = url + '/api.php/provide/searchFilter?type_id=' + tid + '&pagenum=' + pg + '&pagesize=24&';
-    reqUrl += `year=${ext.year || ''}&category=${ext.category || ''}&area=${ext.area || ''}`;
+    reqUrl += `year=${extend.year || ''}&category=${extend.category || ''}&area=${extend.area || ''}`;
     let data = (await request(reqUrl)).data;
     let videos = [];
     for (const vod of data.result) {
@@ -178,16 +174,16 @@ async function category(inReq, outResp) {
             vod_remarks: vod.msg,
         });
     }
-    outResp.send({
+    return {
         page: parseInt(data.page),
         pagecount: data.pagesize,
         limit: 24,
         total: data.total,
         list: videos,
-    });
+    };
 }
 
-async function detail(inReq, outResp) {
+async function detail(inReq, _outResp) {
     const ids = !Array.isArray(inReq.body.id) ? [inReq.body.id] : inReq.body.id;
     const videos = [];
     for (const id of ids) {
@@ -228,18 +224,18 @@ async function detail(inReq, outResp) {
         vod.vod_play_url = vod_play_url.join('$$$');
         videos.push(vod);
     }
-    outResp.send({
+    return {
         list: videos,
-    });
+    };
 }
 
-async function play(inReq, outResp) {
+async function play(inReq, _outResp) {
     const flag = inReq.body.flag;
     const id = inReq.body.id;
     if (flag == 'alivc') {
         const ua = `Dalvik/2.1.0(sevenVideo android)${device.release} ${appVer} ${device.brand}`;
         let data = (await request(url + '/api.php/provide/getVideoPlayAuth?videoId=' + id)).data;
-        var s = Utf8.stringify(Base64.parse(data.playAuth));
+        var s = CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(data.playAuth));
         s = JSON.parse(s);
 
         const e = {
@@ -264,7 +260,7 @@ async function play(inReq, outResp) {
 
         let param = keys.map((k) => k + '=' + encodeURIComponent(e[k])).join('&');
         let signSrc = 'GET&%2F&' + encodeURIComponent(param);
-        let sign = Base64.stringify(HmacSHA1(signSrc, s.AccessKeySecret + '&'));
+        let sign = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA1(signSrc, s.AccessKeySecret + '&'));
         param += '&Signature=' + encodeURIComponent(sign);
 
         const aliurl = 'https://vod.cn-shanghai.aliyuncs.com/?' + param;
@@ -275,20 +271,19 @@ async function play(inReq, outResp) {
         });
         if (res.status == 200) {
             const p = res.data;
-            outResp.send({
+            return {
                 parse: 0,
                 url: p.PlayInfoList.PlayInfo[0].PlayURL,
                 header: {
                     'User-Agent': ua,
                 },
-            });
+            };
         } else {
-            outResp.send({
+            return {
                 parse: 0,
                 url: id,
-            });
+            };
         }
-        return;
     }
 
     let data = (await request(url + '/api.php/provide/parserUrl?url=' + id + '&retryNum=0')).data;
@@ -300,7 +295,7 @@ async function play(inReq, outResp) {
         if (playHeader) {
             result.header = Object.assign(result.header, playHeader);
         }
-        outResp.send(result);
+        return result;
     } else {
         let res = await axios.get(jxUrl, {
             headers: {
@@ -312,11 +307,11 @@ async function play(inReq, outResp) {
         if (playHeader) {
             result.header = Object.assign(result.header, playHeader);
         }
-        outResp.send(result);
+        return result;
     }
 }
 
-async function search(inReq, outResp) {
+async function search(inReq, _outResp) {
     const pg = inReq.body.page;
     const wd = inReq.body.wd;
     let page = pg || 1;
@@ -331,11 +326,11 @@ async function search(inReq, outResp) {
             vod_remarks: vod.msg,
         });
     }
-    outResp.send({
+    return {
         page: page,
         pagecount: data.pages,
         list: videos,
-    });
+    };
 }
 
 function rand(min, max) {
@@ -451,7 +446,7 @@ async function test(inReq, outResp) {
         page: 1,
     });
     dataResult.search = resp.json();
-    outResp.send(dataResult);
+    return dataResult;
 }
 
 export default {
