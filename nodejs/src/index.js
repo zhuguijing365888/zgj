@@ -24,6 +24,7 @@ export async function start(config) {
         serverFactory: catServerFactory,
         forceCloseConnections: true,
         logger: !!(process.env.NODE_ENV !== 'development'),
+        maxParamLength: 10240,
     });
     server.messageToDart = async (data, inReq) => {
         try {
@@ -41,6 +42,17 @@ export async function start(config) {
             return null;
         }
     };
+    server.address = function () {
+        const result = this.server.address();
+        result.url = `http://${result.address}:${result.port}`;
+        result.dynamic = 'js2p://_WEB_';
+        return result;
+    };
+    server.addHook('onError', async (_request, _reply, error) => {
+        console.error(error);
+        if (!error.statusCode) error.statusCode = 500;
+        return error;
+    });
     server.stop = false;
     server.config = config;
     // 推荐使用NODE_PATH做db存储的更目录，这个目录在应用中清除缓存时会被清空
