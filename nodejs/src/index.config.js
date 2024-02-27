@@ -1,5 +1,9 @@
 export default {
-    kunyu77: {},
+    kunyu77: {
+        testcfg: {
+            bbbb: 'aaaaa',
+        },
+    },
     color: [
         {
             light: {

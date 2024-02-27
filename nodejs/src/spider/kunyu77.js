@@ -20,7 +20,7 @@ swIDAQAB
     'pkcs8-public-pem',
     {
         encryptionScheme: 'pkcs1',
-    },
+    }
 );
 
 async function request(reqUrl, ua) {
@@ -75,6 +75,7 @@ async function request(reqUrl, ua) {
 }
 
 async function init(inReq, _outResp) {
+    console.log(inReq.server.config.kunyu77.testcfg);
     const deviceKey = inReq.server.prefix + '/device';
     device = await inReq.server.db.getObjectDefault(deviceKey, {});
     if (!device.id) {
