@@ -4,6 +4,16 @@ export default {
             bbbb: 'aaaaa',
         },
     },
+    alist: [
+        {
+            name: '🐉神族九帝',
+            server: 'https://alist.shenzjd.com',
+        },
+        {
+            name: '💢repl',
+            server: 'https://ali.liucn.repl.co',
+        },
+    ],
     color: [
         {
             light: {
