@@ -1,5 +1,5 @@
 # CatVodOpen
-Open version of catvod..
+Open version of catvod.
 
 [🚀TG](https://t.me/catvodapp_offical)
 
