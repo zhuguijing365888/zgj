@@ -7,6 +7,38 @@
         "type": 3,
         "api": "assets://js/kunyu77_open.js"
       },
+      live: {
+    contents: "https://gitee.com/galnt/cctv/raw/master/contents.txt",
+    url: [
+      { name: "范明明 ", url: "https://live.fanmingming.com/tv/m3u/ipv6.m3u" },
+      {
+        name: "肥羊 ",
+        url: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/Ftindy/IPTV-URL/main/SXYD.m3u"
+      },
+      { name: "优质源 ", url: "https://raw.gitmirror.com/wwb521/live/main/tv.txt" },
+      {
+        name: "M3U源 ",
+        url: "https://mirror.ghproxy.com/https://raw.githubusercontent.com/wwb521/live/main/tv.m3u",
+        index: "false"
+      },
+      { name: "ITV ", url: "https://mirror.ghproxy.com/raw.githubusercontent.com/ssili126/tv/main/itvlist.txt", index: "true" },
+      { name: "道长源 ", "url": "https://mirror.ghproxy.com/raw.githubusercontent.com/dxawi/0/main/tvlive.txt" },
+      { name: "俊于源 ", "url": "http://home.jundie.top:81/Cat/tv/live.txt" },
+      { name: "普通源 ", url: "https://gitee.com/zhuyuxian/cyys/raw/master/live20220813.txt", index: "false" }
+    ]
+  },
+  wogg: {
+    url: "https://wogg.xyz"
+  },
+  tudou: {
+    url: "https://tudou.lvdoui.top"
+  },
+  wobg: {
+    url: "https://wobge.run.goorm.io/"
+  },
+  czzy: {
+    url: "https://cz01.vip"
+  },
       {
           "key": "ffm3u8",
           "name": "非凡",
